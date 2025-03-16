@@ -12,7 +12,7 @@ import cors from "cors";
 DBConnect();
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://chaitanyacoaching.netlify.app/"], // Allow multiple origins
+    origin: ["http://localhost:5173", "https://chaitanyacoaching.netlify.app"], // Allow multiple origins
     credentials: true, // Allows cookies and other credentials to be sent
   })
 );
