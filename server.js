@@ -8,6 +8,7 @@ import globalErrorHandler from "./Middlewares/globalErrorHandler.js";
 import nodemailer from "nodemailer";
 const app = express();
 import cors from "cors";
+import noticeRouter from "./Routes/NoticeRoutes.js";
 
 DBConnect();
 app.use(
@@ -20,8 +21,11 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 app.use(urlencoded({ extended: true }));
-
+app.get("/", (req, res) => {
+  res.json("API server is Up and Running , this is the API server!");
+});
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/notice", noticeRouter);
 
 // Error handling middleware
 app.use(globalErrorHandler);
