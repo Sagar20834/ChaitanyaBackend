@@ -1,7 +1,7 @@
 import { Notice } from "../Models/Notice .js";
-import cloudinary from "../config/cloudinaryConfig.js";
+import cloudinary from "../Config/cloudinaryConfig.js";
 import { unlink } from "fs/promises";
-import appError from "../utils/appError.js";
+import appError from "../Utils/appError.js";
 const addNotice = async (req, res, next) => {
   try {
     let {
