@@ -22,11 +22,11 @@ const addNotice = async (req, res, next) => {
     const file = req.file;
 
     if (req.file) {
-      const folderPath = `notice/${title}`;
+      const folderPath = `notice/${title.trim()}`;
 
       const result = await cloudinary.uploader.upload(req.file.path, {
         folder: folderPath,
-        public_id: title, // Use the product ID as the file name
+        public_id: title.trim(), // Use the product ID as the file name
         overwrite: true, // Ensure that the existing file with the same public_id is overwritten
       });
 
