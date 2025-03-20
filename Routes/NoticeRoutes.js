@@ -1,7 +1,13 @@
 import express from "express";
 
 import isLoggedIn from "../Middlewares/isLoggedIn.js";
-import { addNotice, getNotices } from "../Controllers/NoticeController.js";
+import {
+  addNotice,
+  deleteNotice,
+  getNoticeById,
+  getNotices,
+  updateNotice,
+} from "../Controllers/NoticeController.js";
 import isAdmin from "../Middlewares/isAdmin.js";
 import multer from "multer";
 
@@ -26,5 +32,14 @@ noticeRouter.post(
   addNotice
 );
 noticeRouter.get("/allnotice", getNotices);
+noticeRouter.get("/notice/:id", getNoticeById);
+noticeRouter.post(
+  "/editnotice/:id",
+  upload.single("image"),
+  isLoggedIn,
+  isAdmin,
+  updateNotice
+);
+noticeRouter.delete("/deletenotice/:id", isLoggedIn, isAdmin, deleteNotice);
 
 export default noticeRouter;

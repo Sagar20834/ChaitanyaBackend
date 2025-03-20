@@ -18,25 +18,18 @@ const addNotice = async (req, res, next) => {
     if (!(title && description && fileUrl && fileType)) {
       return next(appError("All fields are required", 400));
     }
-
-    const file = req.file;
-
     if (req.file) {
       const folderPath = `notice/${title.trim()}`;
 
       const result = await cloudinary.uploader.upload(req.file.path, {
         folder: folderPath,
-        public_id: title.trim(), // Use the product ID as the file name
-        overwrite: true, // Ensure that the existing file with the same public_id is overwritten
+        public_id: title.trim(),
+        overwrite: true,
       });
-
-      // Remove the uploaded file from the server
       await unlink(req.file.path);
-
-      // Update the image URL in the product object
       fileUrl = result.secure_url;
     }
-
+    author = req.user._id;
     const newNotice = await Notice.create({
       title,
       description,
@@ -48,7 +41,8 @@ const addNotice = async (req, res, next) => {
       previewInSiteOpen,
     });
 
-    res.json({
+    res.status(200).json({
+      status: "success",
       message: "Notice Added  successfully",
       newNotice: newNotice,
     });
@@ -57,9 +51,30 @@ const addNotice = async (req, res, next) => {
   }
 };
 
+const getNoticeById = async (req, res, next) => {
+  try {
+    const notice = await Notice.findById(req.params.id)
+      .populate({
+        path: "author",
+        select: "fullName email isAdmin",
+      })
+      .sort({ createdAt: -1 });
+    res.status(200).json({
+      status: "success",
+      notice,
+    });
+  } catch (error) {
+    return next(new appError("Failed to get notices", 500));
+  }
+};
 const getNotices = async (req, res, next) => {
   try {
-    const notices = await Notice.find({});
+    const notices = await Notice.find({})
+      .populate({
+        path: "author",
+        select: "fullName email isAdmin",
+      })
+      .sort({ createdAt: -1 });
     res.status(200).json({
       status: "success",
       notices,
@@ -69,4 +84,59 @@ const getNotices = async (req, res, next) => {
   }
 };
 
-export { addNotice, getNotices };
+const updateNotice = async (req, res, next) => {
+  try {
+    var { title, description, fileUrl, fileType } = req.body;
+    let updatedData = { title, description, fileType };
+    if (req.file) {
+      const folderPath = `notice/${title.trim()}`;
+
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: folderPath,
+        public_id: title.trim(),
+        overwrite: true,
+      });
+
+      await unlink(req.file.path);
+
+      fileUrl = result.secure_url;
+      updatedData.fileUrl = fileUrl;
+    } else if (fileUrl) {
+      updatedData.fileUrl = fileUrl;
+    }
+
+    const notice = await Notice.findByIdAndUpdate(req.params.id, updatedData, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!notice) {
+      return next(new appError("Notice not found", 404));
+    }
+
+    res.status(200).json({
+      status: "success",
+      message: "Notice updated successfully",
+      updatedNotice: notice,
+    });
+  } catch (error) {
+    return next(new appError(error.message, 500));
+  }
+};
+
+const deleteNotice = async (req, res, next) => {
+  try {
+    const notice = await Notice.findByIdAndDelete(req.params.id);
+    if (!notice) {
+      return next(new appError("Notice not found", 404));
+    }
+    res.status(200).json({
+      status: "success",
+      message: "Notice deleted successfully",
+    });
+  } catch (error) {
+    return next(new appError(error.message, 500));
+  }
+};
+
+export { addNotice, getNotices, getNoticeById, updateNotice, deleteNotice };
