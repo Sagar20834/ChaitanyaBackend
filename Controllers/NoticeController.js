@@ -15,7 +15,7 @@ const addNotice = async (req, res, next) => {
       previewInSiteOpen,
     } = req.body;
 
-    if (!(title && description && fileUrl && fileType)) {
+    if (!(title && description && fileType)) {
       return next(appError("All fields are required", 400));
     }
     if (req.file) {
